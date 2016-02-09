@@ -8,13 +8,18 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,6 +33,12 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = MainActivity.class.getName();
+
+    //Array adapter for the account listing view
+    ArrayAdapter<Account> listAdapter;
+
+    //View for the account listing
+    ListView accountListView;
 
     //List of accounts visible in the main view
     public ArrayList<Account> accounts;
@@ -60,12 +71,15 @@ public class MainActivity extends AppCompatActivity {
         boolean loaded = loadAccounts();
 
         //Create the adapter for the list view
-        ArrayAdapter<Account> adapter = new ArrayAdapter<Account>(this, android.R.layout.simple_list_item_1, accounts);
+        listAdapter = new ArrayAdapter<Account>(this, android.R.layout.simple_list_item_1, accounts);
 
         //Create the list view and assign the adapter to it
-        ListView accountListView = (ListView)findViewById(R.id.account_list);
-        accountListView.setAdapter(adapter);
+        accountListView = (ListView)findViewById(R.id.account_list);
+        accountListView.setAdapter(listAdapter);
         accountListView.setEmptyView(findViewById(R.id.empty_item));
+
+        //Register the list view for context menu
+        registerForContextMenu(accountListView);
 
         Log.i(TAG, "Loaded accounts from memory: " + loaded);
     }
@@ -197,5 +211,67 @@ public class MainActivity extends AppCompatActivity {
     public void launchAddActivity(MenuItem item){
         Intent addAccountIntent = new Intent(this, AddAccountActivity.class);
         startActivity(addAccountIntent);
+    }
+
+    /**
+     * Called when a list view item has been selected with a long click.
+     *
+     * @param menu
+     * @param view
+     * @param menuInfo
+     */
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfo){
+        super.onCreateContextMenu(menu, view, menuInfo);
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.account_list_context_menu, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item){
+        //Save the menu item info
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+
+        //Check which menu item was selected
+        switch(item.getItemId()){
+            case R.id.edit_account:
+                Log.i(TAG, "TODO: Add account editing!");
+                return true;
+            case R.id.delete_account:
+                deleteAccount(info.id);
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+    private void deleteAccount(long id){
+        Log.i(TAG, "Deleting account from row index: " + id);
+
+        //Open the accounts file for reading and for writing
+        try{
+            //Create an OutputStream to write to the destination file
+            FileOutputStream output = openFileOutput("accounts.txt", Context.MODE_PRIVATE);
+
+            //First, delete the account from the accounts list. Index is the id this
+            //method gets as a parameter. Conversion in this case isn't a practical problem,
+            //since probably no-one knows over four billion people and thein IBAN's...
+            accounts.remove((int)id);
+
+            //Write the accounts to the file
+            for(int i = 0; i < accounts.size(); ++i){
+                output.write(accounts.get(i).toCSVString().getBytes());
+            }
+
+            //Notify the account listing manager about the content change
+            listAdapter.notifyDataSetChanged();
+
+            output.close();
+        }
+        catch(Exception ex){
+            Log.e(TAG, "Error while deleting account from row index: " + id);
+            ex.printStackTrace();
+        }
     }
 }
