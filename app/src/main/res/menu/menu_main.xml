@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.accountmanager.MainActivity">
+    <item
+        android:id="@+id/add_account"
+        android:orderInCategory="100"
+        android:title="@string/add_account"
+        android:onClick="launchAddActivity"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/exit"
+        android:orderInCategory="200"
+        android:title="Lopeta"/>
+</menu>
