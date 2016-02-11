@@ -6,7 +6,12 @@
         android:title="@string/edit_account"/>
 
     <item
-        android:id="@+id/delete_account"
+        android:id="@+id/copy_account_number"
         android:orderInCategory="200"
+        android:title="@string/copy_to_clipboard"/>
+
+    <item
+        android:id="@+id/delete_account"
+        android:orderInCategory="300"
         android:title="@string/delete" />
 </menu>

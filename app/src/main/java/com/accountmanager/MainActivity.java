@@ -1,5 +1,7 @@
 package com.accountmanager;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -33,6 +35,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = MainActivity.class.getName();
+    public static final int ADD_ACCOUNT_REQUEST = 1;
 
     //Array adapter for the account listing view
     ArrayAdapter<Account> listAdapter;
@@ -118,6 +121,13 @@ public class MainActivity extends AppCompatActivity {
 
             return true;
         }
+    }
+
+    /**
+     * Reloads the accounts from memory and notifies the listview adapter
+     */
+    private void reloadAccounts(){
+
     }
 
     //Writes a test CSV file to the internal memory
@@ -210,7 +220,26 @@ public class MainActivity extends AppCompatActivity {
 
     public void launchAddActivity(MenuItem item){
         Intent addAccountIntent = new Intent(this, AddAccountActivity.class);
-        startActivity(addAccountIntent);
+        startActivityForResult(addAccountIntent, ADD_ACCOUNT_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        //Check which request we're responding to
+        if (requestCode == ADD_ACCOUNT_REQUEST){
+            //Check if the request was successful and the account was saved!
+            if (resultCode == RESULT_OK && data.getExtras().getBoolean("saved_account")){
+                Log.i(TAG, "Finished adding account with result: OK!");
+                //TODO: Tarkista tän järkevyys..
+                //"Reload" the accounts...
+                accounts.clear();
+                loadAccounts();
+                listAdapter.notifyDataSetChanged();
+            }
+            else{
+                Log.i(TAG, "Finished adding account with other than OK!");
+            }
+        }
     }
 
     /**
@@ -238,12 +267,30 @@ public class MainActivity extends AppCompatActivity {
             case R.id.edit_account:
                 Log.i(TAG, "TODO: Add account editing!");
                 return true;
+            case R.id.copy_account_number:
+                copyAccountNumber(info.id);
+                return true;
             case R.id.delete_account:
                 deleteAccount(info.id);
                 return true;
             default:
                 return super.onContextItemSelected(item);
         }
+    }
+
+    private void copyAccountNumber(long id){
+        Log.i(TAG, "Copying: " + accounts.get((int)id).getNumber());
+
+        //Get a handle to the clipboard service
+        ClipboardManager clipboard = (ClipboardManager)getSystemService(this.CLIPBOARD_SERVICE);
+
+        //Copy the account number to a ClipData object
+        ClipData clip = ClipData.newPlainText("account number", accounts.get((int)id).getNumber());
+
+        //Put the clip object to the clipboard
+        clipboard.setPrimaryClip(clip);
+
+        Log.i(TAG, "Success!!");
     }
 
     private void deleteAccount(long id){
@@ -262,6 +309,7 @@ public class MainActivity extends AppCompatActivity {
             //Write the accounts to the file
             for(int i = 0; i < accounts.size(); ++i){
                 output.write(accounts.get(i).toCSVString().getBytes());
+
             }
 
             //Notify the account listing manager about the content change
