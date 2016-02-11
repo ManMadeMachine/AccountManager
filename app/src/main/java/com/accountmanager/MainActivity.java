@@ -265,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
         //Check which menu item was selected
         switch(item.getItemId()){
             case R.id.edit_account:
-                Log.i(TAG, "TODO: Add account editing!");
+                startEditActivity(info.id);
                 return true;
             case R.id.copy_account_number:
                 copyAccountNumber(info.id);
@@ -276,6 +276,12 @@ public class MainActivity extends AppCompatActivity {
             default:
                 return super.onContextItemSelected(item);
         }
+    }
+
+    private void startEditActivity(long id){
+        //Create an intent and start the account editing activity
+        Intent editIntent = new Intent(this, EditAccountActivity.class);
+        startActivity(editIntent);
     }
 
     private void copyAccountNumber(long id){
