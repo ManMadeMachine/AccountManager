@@ -12,7 +12,14 @@
     tools:context="com.accountmanager.AddAccountActivity"
     tools:showIn="@layout/activity_add_account">
 
+    <!-- Container layout for the actual input view -->
     <LinearLayout
+        android:id="@+id/content_holder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"/>
+
+    <!--<LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -39,13 +46,12 @@
             android:layout_height="wrap_content"
             android:singleLine="true" />
 
-        <!-- Save button and a possible cancel button -->
+
         <Button
             android:id="@+id/create_account"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/activity_vertical_margin"
             android:text="@string/create"/>
-
-    </LinearLayout>
+    </LinearLayout>-->
 </RelativeLayout>

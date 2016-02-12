@@ -6,7 +6,7 @@
         android:id="@+id/add_account"
         android:orderInCategory="100"
         android:title="@string/add_account"
-        android:onClick="launchAddActivity"
+        android:onClick="startAddActivity"
         app:showAsAction="never"/>
 
     <item

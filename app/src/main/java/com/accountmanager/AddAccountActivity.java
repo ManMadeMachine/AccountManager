@@ -7,9 +7,11 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -18,8 +20,10 @@ import java.io.IOException;
 public class AddAccountActivity extends AppCompatActivity {
     public final static String TAG = AddAccountActivity.class.getName();
 
-    public final static String SAVE_SUCCESS = "save_success";
+    //key string for the returned result
+    public final static String ACCOUNT_CREATED = "account_created";
 
+    //New account owner and number strings
     private String newOwner;
     private String newNumber;
 
@@ -34,13 +38,26 @@ public class AddAccountActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Button createButton = (Button)findViewById(R.id.create_account);
+        //Get the main layoyt of this activity
+        LinearLayout main_layout = (LinearLayout)findViewById(R.id.content_holder);
+
+        //Get the layout inflater service
+        LayoutInflater inflater = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
+
+        //Inflate the external account input view
+        View input_view = inflater.inflate(R.layout.account_input, main_layout, false);
+
+        //Set the "Save" -button text to the appropriate string
+        Button createButton = (Button)input_view.findViewById(R.id.save_button);
+        createButton.setText(R.string.create);
+
+        //Set the onClick listener for the create button
         createButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
                 //Get the user input and store them
-                newOwner = ((EditText)findViewById(R.id.new_owner)).getText().toString();
-                newNumber = ((EditText)findViewById(R.id.new_number)).getText().toString();
+                newOwner = ((EditText)findViewById(R.id.owner)).getText().toString();
+                newNumber = ((EditText)findViewById(R.id.number)).getText().toString();
 
                 //Try to validate and save the new account.
                 if (validateAccount()){
@@ -49,7 +66,7 @@ public class AddAccountActivity extends AppCompatActivity {
                     //Save the new account into the accounts file. If the saving is
                     //successful, we can close this activity and return to the main activity
                     if(saveAccount()){
-                        finishWithResult();
+                        finishWithResult(true);
                     }
                     else{
                         //If the saving failed, inform the user
@@ -63,9 +80,21 @@ public class AddAccountActivity extends AppCompatActivity {
             }
         });
 
+        //Attach the account input view to the main layout
+        main_layout.addView(input_view);
+
+        /*Button createButton = (Button)findViewById(R.id.create_account);
+
+        */
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
+    /**
+     * Method that validates the given input when a new account is being created. Checks that the given
+     * input was not empty or null and also checks that the account number was 18 characters long.
+     *
+     * @return boolean returns true if input was valid, false otherwise.
+     */
     private boolean validateAccount(){
         boolean success = false;
 
@@ -98,7 +127,6 @@ public class AddAccountActivity extends AppCompatActivity {
                 //Replace the number string with the temporary string
                 newNumber = tempString.toString();
 
-                Log.i(TAG, newNumber);
                 success = true;
             }
         }
@@ -108,7 +136,7 @@ public class AddAccountActivity extends AppCompatActivity {
 
     /**
      * Saves the new account to the end of the accounts file
-     *
+     * @return boolean returns true if account was saved successfully
      */
     private boolean saveAccount(){
         boolean success = false;
@@ -142,10 +170,12 @@ public class AddAccountActivity extends AppCompatActivity {
         return success;
     }
 
-
-    private void finishWithResult(){
+    /**
+     * Method for finishing this activity with a result. The result
+     */
+    private void finishWithResult(boolean created){
         Intent data = new Intent();
-        data.putExtra("saved_account", true);
+        data.putExtra(ACCOUNT_CREATED, created);
         setResult(RESULT_OK, data);
         finish();
     }

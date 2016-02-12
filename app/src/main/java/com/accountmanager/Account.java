@@ -32,22 +32,15 @@ public class Account implements Serializable{
         //Trim newlines and leading spaces from the string
         csvString = csvString.trim();
 
-        Log.i(TAG, "Trimmed string: " + csvString);
-
         //Create a temporary array for the string parts
         String[] parts = new String[2];
 
         //Split the string from the comma
         parts = csvString.split(COMMA);
 
-        Log.i(TAG, "Parts[0]:" + parts[0] + ", parts[1]: " + parts[1]);
-
         //Assign the owner and number values from the array
         this.owner = parts[0];
         this.number = parts[1];
-
-        Log.i(TAG, "Acc. owner: " + this.owner);
-        Log.i(TAG, "Acc. number: " + this.number);
     }
 
     /**
@@ -63,7 +56,7 @@ public class Account implements Serializable{
      * @param owner
      */
     public void setOwner(String owner){
-
+        this.owner = owner;
     }
 
     /**
@@ -78,8 +71,8 @@ public class Account implements Serializable{
      *
      * @param number
      */
-    public void setNumer(String number){
-
+    public void setNumber(String number){
+        this.number = number;
     }
 
     public String toCSVString(){

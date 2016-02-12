@@ -7,6 +7,7 @@
     <string name="new_account_number">Tilinumero</string>
     <string name="create">Luo</string>
     <string name="save">Tallenna</string>
+    <string name="edit">Muokkaa</string>
     <string name="copy_to_clipboard">Kopioi leikepöydälle</string>
     <string name="delete">Poista</string>
     <string name="title_activity_edit_account">Muokkaa tiliä</string>

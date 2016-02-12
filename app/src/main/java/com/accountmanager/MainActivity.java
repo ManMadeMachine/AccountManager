@@ -36,6 +36,11 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = MainActivity.class.getName();
     public static final int ADD_ACCOUNT_REQUEST = 1;
+    public static final int EDIT_ACCOUNT_REQUEST = 2;
+
+    //Account edit intent message keys
+    public static final String OWNER_MESSAGE = "owner";
+    public static final String NUMBER_MESSAGE = "number";
 
     //Array adapter for the account listing view
     ArrayAdapter<Account> listAdapter;
@@ -52,20 +57,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-        */
-
-        //Test writing and reading
-        //writeTestFile();
-        //readTestFile();
 
         //Initialize the accounts List
         accounts = new ArrayList<Account>();
@@ -123,13 +114,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Reloads the accounts from memory and notifies the listview adapter
-     */
-    private void reloadAccounts(){
-
-    }
-
     //Writes a test CSV file to the internal memory
     //Deletes the file after it has been created, so that the memory
     //won't get cluttered with test CSV files
@@ -179,7 +163,6 @@ public class MainActivity extends AppCompatActivity {
             //Read as long as there are lines to be read
             while((line = buffer.readLine()) != null){
                 //Print the lines
-                //TODO: Add an account to the accounts list
                 Log.i("Buffer:", line);
             }
 
@@ -209,16 +192,15 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        //TODO: Vaihda tähän lopetusnäppäimen toiminnallisuus eli lopetus
-        if (id == R.id.add_account) {
-            Log.i(TAG, "Adding account..");
-            return true;
+        if (id == R.id.exit) {
+            Log.i(TAG, "Exiting..");
+            finish();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    public void launchAddActivity(MenuItem item){
+    public void startAddActivity(MenuItem item){
         Intent addAccountIntent = new Intent(this, AddAccountActivity.class);
         startActivityForResult(addAccountIntent, ADD_ACCOUNT_REQUEST);
     }
@@ -227,19 +209,61 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         //Check which request we're responding to
         if (requestCode == ADD_ACCOUNT_REQUEST){
-            //Check if the request was successful and the account was saved!
-            if (resultCode == RESULT_OK && data.getExtras().getBoolean("saved_account")){
+            //Check if the request was successful and the account was created!
+            if (resultCode == RESULT_OK && data.getExtras().getBoolean(AddAccountActivity.ACCOUNT_CREATED)){
                 Log.i(TAG, "Finished adding account with result: OK!");
-                //TODO: Tarkista tän järkevyys..
+                //TODO: joku reloadAccount?
                 //"Reload" the accounts...
                 accounts.clear();
                 loadAccounts();
                 listAdapter.notifyDataSetChanged();
             }
+        }
+        else if (requestCode == EDIT_ACCOUNT_REQUEST){
+            if (resultCode == RESULT_OK){
+                Log.i(TAG, "Edit finished with result OK! Account updated: " + data.getExtras().getBoolean(EditAccountActivity.EDIT_SUCCESS));
+
+                //Check if the account was updated and apply the updates
+                if(data.getExtras().getBoolean(EditAccountActivity.EDIT_SUCCESS)){
+                    int id = data.getExtras().getInt("id");
+                    String owner = data.getExtras().getString(OWNER_MESSAGE);
+                    String number = data.getExtras().getString(NUMBER_MESSAGE);
+
+                    applyAccountUpdates(id, owner, number);
+                }
+            }
             else{
-                Log.i(TAG, "Finished adding account with other than OK!");
+                Log.i(TAG, "Edit finished with NOT OK!");
             }
         }
+    }
+
+    /**
+     *
+     * @param id
+     * @param owner
+     * @param number
+     */
+    private void applyAccountUpdates(int id, String owner, String number){
+        //Update the accounts list
+        accounts.get(id).setOwner(owner);
+        accounts.get(id).setNumber(number);
+
+        //Basically just write the whole list again..
+        //TODO: make updating accounts better..
+        try{
+            FileOutputStream output = openFileOutput("accounts.txt", Context.MODE_PRIVATE);
+
+            for (int i = 0; i < accounts.size(); ++i){
+                output.write(accounts.get(i).toCSVString().getBytes());
+            }
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+
+        //Remember to notify the list adapter!!
+        listAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -281,7 +305,12 @@ public class MainActivity extends AppCompatActivity {
     private void startEditActivity(long id){
         //Create an intent and start the account editing activity
         Intent editIntent = new Intent(this, EditAccountActivity.class);
-        startActivity(editIntent);
+
+        //Add the account information to the intent
+        editIntent.putExtra("id", (int)id);
+        editIntent.putExtra(OWNER_MESSAGE, accounts.get((int)id).getOwner());
+        editIntent.putExtra(NUMBER_MESSAGE, accounts.get((int) id).getNumber());
+        startActivityForResult(editIntent, EDIT_ACCOUNT_REQUEST);
     }
 
     private void copyAccountNumber(long id){
@@ -315,7 +344,6 @@ public class MainActivity extends AppCompatActivity {
             //Write the accounts to the file
             for(int i = 0; i < accounts.size(); ++i){
                 output.write(accounts.get(i).toCSVString().getBytes());
-
             }
 
             //Notify the account listing manager about the content change
