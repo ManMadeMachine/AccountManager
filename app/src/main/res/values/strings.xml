@@ -12,4 +12,19 @@
     <string name="delete">Delete</string>
     <string name="title_activity_edit_account">Edit acccount</string>
     <string name="exit">Exit</string>
+    <string name="empty_input_error">Fill both fields!</string>
+    <string name="invalid_number_error">Invalid account number!</string>
+
+    <!-- Country codes for the account numbers -->
+    <string-array name="countryCodes">
+        <item>FI</item>
+        <item>SE</item>
+    </string-array>
+
+    <!-- Country-specific account number lengths. These have to be in the same order as the
+    country codes -->
+    <integer-array name="numberLengths">
+        <item>18</item>
+        <item>24</item>
+    </integer-array>
 </resources>

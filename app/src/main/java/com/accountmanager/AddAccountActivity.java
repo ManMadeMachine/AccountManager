@@ -60,15 +60,29 @@ public class AddAccountActivity extends AppCompatActivity {
                 newOwner = ((EditText)findViewById(R.id.owner)).getText().toString();
                 newNumber = ((EditText)findViewById(R.id.number)).getText().toString();
 
-                //Try to validate and save the new account.
-                if (validateAccount() && saveAccount()){
+                //Get the resource arrays needed for validation
+                String[] countries = getResources().getStringArray(R.array.countryCodes);
+                int[] numberLengths = getResources().getIntArray(R.array.numberLengths);
+
+                boolean isValid = false;
+                try {
+                    //Try to validate and save the new account.
+                    isValid = Utilities.isAccountValid(newOwner, newNumber, countries, numberLengths);
+                }
+                catch(Exception ex){
+                    ex.printStackTrace();
+                }
+
+                if (isValid){
+                    saveAccount();
+
                     //Save the new account into the accounts file. If the saving is
                     //successful, we can close this activity and return to the main activity
                     finishWithResult(true);
                 }
                 else{
                     //If the saving failed, inform the user
-                    Toast errorToast = Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_SHORT);
+                    Toast errorToast = Toast.makeText(getApplicationContext(), Utilities.validationErrorMessage, Toast.LENGTH_SHORT);
                     errorToast.show();
                 }
             }
@@ -77,58 +91,7 @@ public class AddAccountActivity extends AppCompatActivity {
         //Attach the account input view to the main layout
         main_layout.addView(input_view);
 
-        /*Button createButton = (Button)findViewById(R.id.create_account);
-
-        */
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    }
-
-    /**
-     * Method that validates the given input when a new account is being created. Checks that the given
-     * input was not empty or null and also checks that the account number was 18 characters long.
-     *
-     * @return boolean returns true if input was valid, false otherwise.
-     */
-    private boolean validateAccount(){
-        boolean success = false;
-
-        //Null and empty string validation
-        if (newOwner != null && !newOwner.isEmpty() && newNumber != null && !newNumber.isEmpty()){
-            //TODO: Validate number string's IBAN-format (e.g. FI-prefix and 18 digits)
-
-            //Trim every whitespace character from the number string
-            newNumber = newNumber.replaceAll(" ", "");
-            int length = newNumber.length();
-
-            //Check number length (Finnish IBAN length: 18 characters)
-            if (length != 18){
-                errorMessage = "Incorrect account number length!";
-            }
-            else {
-                StringBuilder tempString = new StringBuilder();
-
-                //Length was correct, split the number into groups of four, for readability
-                for (int i = 0; i < newNumber.length(); ++i) {
-                    //Check the need for a whitespace and add it if necessary
-                    if ((i > 0) && (i % 4 == 0)){
-                        tempString.append(' ');
-                    }
-
-                    //Always add the current character to the temporary string
-                    tempString.append(newNumber.charAt(i));
-                }
-
-                //Replace the number string with the temporary string
-                newNumber = tempString.toString();
-
-                success = true;
-            }
-        }
-        else{
-            errorMessage = "Fill both fields!"; //TODO: Korvaa kaikki tälläset resurssistringeillä
-        }
-
-        return success;
     }
 
     /**

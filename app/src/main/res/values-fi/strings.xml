@@ -13,4 +13,6 @@
     <string name="delete">Poista</string>
     <string name="title_activity_edit_account">Muokkaa tiliä</string>
     <string name="exit">Lopeta</string>
+    <string name="empty_input_error">Täytä kummatkin kentät!</string>
+    <string name="invalid_number_error">Virhe tilinumerossa!</string>
 </resources>

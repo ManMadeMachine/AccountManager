@@ -76,6 +76,9 @@ public class MainActivity extends AppCompatActivity {
         registerForContextMenu(accountListView);
 
         Log.i(TAG, "Loaded accounts from memory: " + loaded);
+
+        //Set the Utility class resources
+        Utilities.setResources(getResources());
     }
 
     /**

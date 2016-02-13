@@ -21,7 +21,7 @@ public class Account implements Serializable{
      */
     public Account(String owner, String number){
         this.owner = owner;
-        this.number = number;
+        this.setNumber(number);
     }
 
     /**
@@ -40,7 +40,7 @@ public class Account implements Serializable{
 
         //Assign the owner and number values from the array
         this.owner = parts[0];
-        this.number = parts[1];
+        this.setNumber(parts[1]);
     }
 
     /**
@@ -68,10 +68,33 @@ public class Account implements Serializable{
     }
 
     /**
+     * Sets the account number. Divides the number into groups of four characters before assigning it
+     * to the number variable.
      *
-     * @param number
+     * @param number account number
      */
     public void setNumber(String number){
+        //Trim all the existing formatting whitespace to make it easier to format the new number
+        number = number.replaceAll(" ", "");
+
+        //Temporary string builder for making the new number string
+        StringBuilder tempString = new StringBuilder();
+
+        //Split the number into the groups of four characters
+        for (int i = 0; i < number.length(); ++i) {
+            //Check the need for a whitespace and add it if necessary
+            if ((i > 0) && (i % 4 == 0)){
+                tempString.append(' ');
+            }
+
+            //Always add the current character to the temporary string
+            tempString.append(number.charAt(i));
+        }
+
+        //Replace the number string with the temporary string and change the
+        number = tempString.toString();
+        number = number.toUpperCase();
+
         this.number = number;
     }
 
