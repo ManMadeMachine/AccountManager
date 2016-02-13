@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -70,8 +71,8 @@ public class AddAccountActivity extends AppCompatActivity {
                     }
                     else{
                         //If the saving failed, inform the user
-                        //TODO: Toast tms., mikä ilmottaa virheestä
-                        Log.e(TAG, "Jotain meni pieleen uutta tiliä tallennettaessa!!");
+                        Toast errorToast = Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_SHORT);
+                        errorToast.show();
                     }
                 }
                 else{
@@ -129,6 +130,9 @@ public class AddAccountActivity extends AppCompatActivity {
 
                 success = true;
             }
+        }
+        else{
+            errorMessage = "Fill both fields!";
         }
 
         return success;

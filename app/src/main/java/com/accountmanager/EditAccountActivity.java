@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class EditAccountActivity extends AppCompatActivity {
 
@@ -77,8 +78,13 @@ public class EditAccountActivity extends AppCompatActivity {
                 }
                 else{
                     //Information was updated, validate and finish with the updated information
-                    validateAccount();
-                    finishWithResult(true);
+                    if(validateAccount()) {
+                        finishWithResult(true);
+                    }
+                    else{
+                        Toast errorToast = Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_SHORT);
+                        errorToast.show();
+                    }
                 }
             }
         });
@@ -108,7 +114,7 @@ public class EditAccountActivity extends AppCompatActivity {
 
             //Check number length (Finnish IBAN length: 18 characters)
             if (length != 18){
-                errorMessage = "Incorrect account number length!";
+                errorMessage = "Incorrect account number!";
             }
             else {
                 StringBuilder tempString = new StringBuilder();
@@ -130,6 +136,10 @@ public class EditAccountActivity extends AppCompatActivity {
                 Log.i(TAG, "New nr: " + newNumber);
                 success = true;
             }
+        }
+        else{
+            //one of the input fields was empty
+            errorMessage = "Fill both input fields!";
         }
 
         return success;
