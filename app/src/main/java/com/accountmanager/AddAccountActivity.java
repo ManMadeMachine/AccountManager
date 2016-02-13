@@ -61,22 +61,15 @@ public class AddAccountActivity extends AppCompatActivity {
                 newNumber = ((EditText)findViewById(R.id.number)).getText().toString();
 
                 //Try to validate and save the new account.
-                if (validateAccount()){
-                    Log.i(TAG, "Input was correct!");
-
+                if (validateAccount() && saveAccount()){
                     //Save the new account into the accounts file. If the saving is
                     //successful, we can close this activity and return to the main activity
-                    if(saveAccount()){
-                        finishWithResult(true);
-                    }
-                    else{
-                        //If the saving failed, inform the user
-                        Toast errorToast = Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_SHORT);
-                        errorToast.show();
-                    }
+                    finishWithResult(true);
                 }
                 else{
-                    Log.i(TAG, "Input was NOT correct!");
+                    //If the saving failed, inform the user
+                    Toast errorToast = Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_SHORT);
+                    errorToast.show();
                 }
             }
         });
@@ -132,7 +125,7 @@ public class AddAccountActivity extends AppCompatActivity {
             }
         }
         else{
-            errorMessage = "Fill both fields!";
+            errorMessage = "Fill both fields!"; //TODO: Korvaa kaikki tälläset resurssistringeillä
         }
 
         return success;

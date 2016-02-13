@@ -1,14 +1,15 @@
 <resources>
     <string name="app_name">AccountManager</string>
-    <string name="add_account">Lisää tili</string>
-    <string name="no_added_accounts">Ei lisättyjä tilejä</string>
-    <string name="title_activity_add_account">Uusi tili</string>
-    <string name="new_account_owner">Omistaja</string>
-    <string name="new_account_number">Tilinumero</string>
-    <string name="create">Luo</string>
-    <string name="save">Tallenna</string>
-    <string name="edit">Muokkaa</string>
-    <string name="copy_to_clipboard">Kopioi leikepöydälle</string>
-    <string name="delete">Poista</string>
-    <string name="title_activity_edit_account">Muokkaa tiliä</string>
+    <string name="add_account">Add account</string>
+    <string name="no_added_accounts">No added accounts</string>
+    <string name="title_activity_add_account">New account</string>
+    <string name="new_account_owner">Owner</string>
+    <string name="new_account_number">Account number</string>
+    <string name="create">Create</string>
+    <string name="save">Save</string>
+    <string name="edit">Edit</string>
+    <string name="copy_to_clipboard">Copy number to clipboard</string>
+    <string name="delete">Delete</string>
+    <string name="title_activity_edit_account">Edit acccount</string>
+    <string name="exit">Exit</string>
 </resources>
