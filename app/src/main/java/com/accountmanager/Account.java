@@ -9,15 +9,18 @@ import java.lang.annotation.Documented;
  * Created by Aperture Science on 5.2.2016.
  */
 public class Account implements Serializable{
+    //Constants
     public static final String TAG = Account.class.getName();
     private static final String COMMA = ",";
+
+    //Strings for account owner and number
     private String owner;
     private String number;
 
     /**
-     *
-     * @param owner
-     * @param number
+     * Constructor for Account
+     * @param owner owner of the account
+     * @param number account number
      */
     public Account(String owner, String number){
         this.owner = owner;
@@ -26,7 +29,8 @@ public class Account implements Serializable{
 
     /**
      * Create a new account object from a CSV string.
-     * @param csvString
+     *
+     * @param csvString Comma-separated-value string holding the owner and number information
      */
     public Account(String csvString){
         //Trim newlines and leading spaces from the string
@@ -44,24 +48,25 @@ public class Account implements Serializable{
     }
 
     /**
+     * Get method for owner.
      *
-     * @return
+     * @return owner string
      */
     public String getOwner(){
         return this.owner;
     }
 
     /**
-     *
-     * @param owner
+     * Set method for owner
+     * @param owner new owner
      */
     public void setOwner(String owner){
         this.owner = owner;
     }
 
     /**
-     *
-     * @return
+     * Get method for account number
+     * @return account number as a string
      */
     public String getNumber(){
         return this.number;
@@ -98,14 +103,24 @@ public class Account implements Serializable{
         this.number = number;
     }
 
+    /**
+     * Method for getting the account information as a comma-separated-value string.
+     * Used when an account is saved to a file.
+     *
+     * @return account information as a CSV string
+     */
     public String toCSVString(){
         return this.owner + COMMA + this.number + System.getProperty("line.separator");
     }
+
     /**
+     * Method for getting account as a string. Overwritten so that owner and number
+     * are written to separate lines. Used by MainActivity's list view.
      *
+     * @return string information of the account, on two lines
      */
     @Override
     public String toString(){
-        return this.owner + "\n" + this.number;
+        return this.owner + System.getProperty("line.separator") + this.number;
     }
 }

@@ -1,8 +1,10 @@
 package com.accountmanager;
 
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -33,7 +35,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-
+    //Constants
     public static final String TAG = MainActivity.class.getName();
     public static final int ADD_ACCOUNT_REQUEST = 1;
     public static final int EDIT_ACCOUNT_REQUEST = 2;
@@ -41,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     //Account edit intent message keys
     public static final String OWNER_MESSAGE = "owner";
     public static final String NUMBER_MESSAGE = "number";
+    public static final String ACCOUNTS_FILENAME = "accounts.txt";
+    public static final String ROW_INDEX = "row_index";
 
     //Array adapter for the account listing view
     ArrayAdapter<Account> listAdapter;
@@ -75,8 +79,6 @@ public class MainActivity extends AppCompatActivity {
         //Register the list view for context menu
         registerForContextMenu(accountListView);
 
-        Log.i(TAG, "Loaded accounts from memory: " + loaded);
-
         //Set the Utility class resources
         Utilities.setResources(getResources());
     }
@@ -84,11 +86,11 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Loads previously saved accounts into the accounts list
      *
-     * @return boolean returns if accounts were read from the accounts file
+     * @return boolean returns true if accounts were read from the accounts file, false otherwise
      */
     private boolean loadAccounts(){
         //First, check if there was a saved accounts file with a size of > 0 characters
-        File f = new File(this.getFilesDir(), "accounts.txt");
+        File f = new File(this.getFilesDir(), ACCOUNTS_FILENAME);
 
         //If the file was empty, we don't need to load anything
         if (f.length() == 0){
@@ -109,74 +111,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             catch(Exception ex){
-                Log.i(TAG, "Error reading saved accounts!");
                 ex.printStackTrace();
             }
 
             return true;
-        }
-    }
-
-    //Writes a test CSV file to the internal memory
-    //Deletes the file after it has been created, so that the memory
-    //won't get cluttered with test CSV files
-    private void writeTestFile(){
-        //Test key and value to write in the file
-        String key = "Name";
-        String value = "Value";
-
-        try {
-            //Create an OutputStream to the file
-            FileOutputStream output = openFileOutput("accounts.txt", Context.MODE_PRIVATE);
-
-            //Create a CSV string to be written to the file
-            String csv = key + "," + value + "\n";
-            String csv2 = key + "2," + value +"2\n";
-
-            String account = "Pekka peräaho,123456789\n";
-
-            //Write something to the file
-            output.write(csv.getBytes());
-            output.write(csv2.getBytes());
-            output.write(account.getBytes());
-            output.close();
-
-            Log.i(TAG, "Wrote to file");
-
-        }
-        catch (Exception exception){
-            Log.i(TAG, "Error writing to file!");
-            exception.printStackTrace();
-        }
-    }
-
-    //Test method for reading the written storage file
-    private void readTestFile(){
-        try{
-            File f = new File(this.getFilesDir(), "accounts.txt");
-
-            //Test file size
-            Log.i(TAG, "File size when reading: " + f.length());
-
-            //Create a buffered reader to read from the file
-            BufferedReader buffer = new BufferedReader(new FileReader(f));
-
-            String line = null;
-
-            //Read as long as there are lines to be read
-            while((line = buffer.readLine()) != null){
-                //Print the lines
-                Log.i("Buffer:", line);
-            }
-
-            //Remember to close the buffer
-            buffer.close();
-
-            //f.delete();
-        }
-        catch(Exception ex){
-            Log.i(TAG, "Error reading file!");
-            ex.printStackTrace();
         }
     }
 
@@ -194,8 +132,11 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.exit) {
+        //Check the menu item id and act accordingly
+        if (id == R.id.add_account){
+            startAddActivity(item);
+        }
+        else if (id == R.id.exit) {
             Log.i(TAG, "Exiting..");
             finish();
         }
@@ -203,6 +144,10 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Method for starting the account addition activity
+     * @param item the menu item that was pressed
+     */
     public void startAddActivity(MenuItem item){
         Intent addAccountIntent = new Intent(this, AddAccountActivity.class);
         startActivityForResult(addAccountIntent, ADD_ACCOUNT_REQUEST);
@@ -214,8 +159,6 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == ADD_ACCOUNT_REQUEST){
             //Check if the request was successful and the account was created!
             if (resultCode == RESULT_OK && data.getExtras().getBoolean(AddAccountActivity.ACCOUNT_CREATED)){
-                Log.i(TAG, "Finished adding account with result: OK!");
-                //TODO: joku reloadAccount?
                 //"Reload" the accounts...
                 accounts.clear();
                 loadAccounts();
@@ -224,28 +167,23 @@ public class MainActivity extends AppCompatActivity {
         }
         else if (requestCode == EDIT_ACCOUNT_REQUEST){
             if (resultCode == RESULT_OK){
-                Log.i(TAG, "Edit finished with result OK! Account updated: " + data.getExtras().getBoolean(EditAccountActivity.EDIT_SUCCESS));
-
                 //Check if the account was updated and apply the updates
                 if(data.getExtras().getBoolean(EditAccountActivity.EDIT_SUCCESS)){
-                    int id = data.getExtras().getInt("id");
+                    int id = data.getExtras().getInt(MainActivity.ROW_INDEX);
                     String owner = data.getExtras().getString(OWNER_MESSAGE);
                     String number = data.getExtras().getString(NUMBER_MESSAGE);
 
                     applyAccountUpdates(id, owner, number);
                 }
             }
-            else{
-                Log.i(TAG, "Edit finished with NOT OK!");
-            }
         }
     }
 
     /**
-     *
-     * @param id
-     * @param owner
-     * @param number
+     * Method for applying the updated account information.
+     * @param id row index in the list
+     * @param owner new owner string
+     * @param number new number string
      */
     private void applyAccountUpdates(int id, String owner, String number){
         //Update the accounts list
@@ -253,9 +191,8 @@ public class MainActivity extends AppCompatActivity {
         accounts.get(id).setNumber(number);
 
         //Basically just write the whole list again..
-        //TODO: make updating accounts better..
         try{
-            FileOutputStream output = openFileOutput("accounts.txt", Context.MODE_PRIVATE);
+            FileOutputStream output = openFileOutput(ACCOUNTS_FILENAME, Context.MODE_PRIVATE);
 
             for (int i = 0; i < accounts.size(); ++i){
                 output.write(accounts.get(i).toCSVString().getBytes());
@@ -272,14 +209,15 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Called when a list view item has been selected with a long click.
      *
-     * @param menu
-     * @param view
-     * @param menuInfo
+     * @param menu context menu
+     * @param view view
+     * @param menuInfo menu information
      */
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfo){
         super.onCreateContextMenu(menu, view, menuInfo);
 
+        //inflate the menu
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.account_list_context_menu, menu);
     }
@@ -305,20 +243,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Method for starting the account editing activity
+     * @param id row index of the item selected
+     */
     private void startEditActivity(long id){
         //Create an intent and start the account editing activity
         Intent editIntent = new Intent(this, EditAccountActivity.class);
 
         //Add the account information to the intent
-        editIntent.putExtra("id", (int)id);
+        editIntent.putExtra(ROW_INDEX, (int)id);
         editIntent.putExtra(OWNER_MESSAGE, accounts.get((int)id).getOwner());
         editIntent.putExtra(NUMBER_MESSAGE, accounts.get((int) id).getNumber());
         startActivityForResult(editIntent, EDIT_ACCOUNT_REQUEST);
     }
 
+    /**
+     * Method that copies the selected account number to the system clipboard
+     *
+     * @param id row index of the selected account
+     */
     private void copyAccountNumber(long id){
-        Log.i(TAG, "Copying: " + accounts.get((int)id).getNumber());
-
         //Get a handle to the clipboard service
         ClipboardManager clipboard = (ClipboardManager)getSystemService(this.CLIPBOARD_SERVICE);
 
@@ -327,17 +272,18 @@ public class MainActivity extends AppCompatActivity {
 
         //Put the clip object to the clipboard
         clipboard.setPrimaryClip(clip);
-
-        Log.i(TAG, "Success!!");
     }
 
+    /**
+     * Method for deleting an account.
+     *
+     * @param id selected account row index
+     */
     private void deleteAccount(long id){
-        Log.i(TAG, "Deleting account from row index: " + id);
-
         //Open the accounts file for reading and for writing
         try{
             //Create an OutputStream to write to the destination file
-            FileOutputStream output = openFileOutput("accounts.txt", Context.MODE_PRIVATE);
+            FileOutputStream output = openFileOutput(ACCOUNTS_FILENAME, Context.MODE_PRIVATE);
 
             //First, delete the account from the accounts list. Index is the id this
             //method gets as a parameter. Conversion in this case isn't a practical problem,
@@ -355,7 +301,6 @@ public class MainActivity extends AppCompatActivity {
             output.close();
         }
         catch(Exception ex){
-            Log.e(TAG, "Error while deleting account from row index: " + id);
             ex.printStackTrace();
         }
     }

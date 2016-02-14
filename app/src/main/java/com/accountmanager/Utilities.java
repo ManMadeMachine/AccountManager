@@ -8,11 +8,20 @@ import android.util.Log;
  * Created by Aperture Science on 13.2.2016.
  */
 public class Utilities {
+    //An error message for validation errors
     public static String validationErrorMessage = null;
 
+    //Resources, used to obtain string resources
     private static Resources resources = null;
 
+    /**
+     * Static method for setting the program resources. Needs to be called before any other
+     * Utilities-class function is called. Otherwise, errors will be thrown.
+     *
+     * @param res Resources object
+     */
     public static void setResources(Resources res){
+        //Check if the resource file was not null and update if necessary
         if(resources == null){
             resources = res;
         }
@@ -25,13 +34,24 @@ public class Utilities {
      *
      * @param owner account owner
      * @param number account number
-     * @param countries string array of country codes
-     * @param numberLengths integer array of country-specific account number lengths
      * @return boolean value true if account information is valid, false otherwise
      * @throws Exception if the resources of this static class are null
      */
-    public static boolean isAccountValid(String owner, String number, String[] countries, int[] numberLengths) throws Exception{
+    public static boolean isAccountValid(String owner, String number) throws Exception{
         boolean success = false;
+
+        //Resource arrays
+        String[] countries;
+        int[] numberLengths;
+
+        //Get the resource arrays needed for validation. Throw an exception if necessary.
+        if (resources != null) {
+            countries = resources.getStringArray(R.array.countryCodes);
+            numberLengths = resources.getIntArray(R.array.numberLengths);
+        }
+        else{
+            throw new Exception("Resources reference of Utilities class was null! Is Utilities.setResources() function called?");
+        }
 
         //Null and empty string validation
         if (owner != null && !owner.isEmpty() && number != null && !number.isEmpty()){
@@ -55,19 +75,12 @@ public class Utilities {
             }
 
             //If needed, assign an error message
-            if (!success){
-                //Check the resources for null
-                if (resources != null)
-                    validationErrorMessage = resources.getString(R.string.invalid_number_error);
-                else
-                    throw new Exception("Resources were null!");
+            if (!success) {
+                validationErrorMessage = resources.getString(R.string.invalid_number_error);
             }
         }
         else{
-            if (resources != null)
-                validationErrorMessage = resources.getString(R.string.empty_input_error); //TODO: Korvaa kaikki tälläset resurssistringeillä
-            else
-                throw new Exception("Resources were null!");
+            validationErrorMessage = resources.getString(R.string.empty_input_error);
         }
 
         return success;

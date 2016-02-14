@@ -18,7 +18,7 @@ import android.widget.Toast;
 public class EditAccountActivity extends AppCompatActivity {
     //Constants
     public static final String TAG = EditAccountActivity.class.getName();
-    public static final String EDIT_SUCCESS = "edit_success"; //TODO: onko hyvä vai olisiko UPDATED parempi?
+    public static final String EDIT_SUCCESS = "edit_success";
 
     //Strings to hold the account data from the intent that started this activity
     private String owner;
@@ -32,9 +32,6 @@ public class EditAccountActivity extends AppCompatActivity {
     private EditText ownerInput;
     private EditText numberInput;
 
-    //Error message string for error information
-    private String errorMessage;
-
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_account);
@@ -42,9 +39,9 @@ public class EditAccountActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         //Get the account data from the intent
-        Intent receicedIntent = getIntent();
-        this.owner = receicedIntent.getExtras().getString(MainActivity.OWNER_MESSAGE);
-        this.number = receicedIntent.getExtras().getString(MainActivity.NUMBER_MESSAGE);
+        Intent receivedIntent = getIntent();
+        this.owner = receivedIntent.getExtras().getString(MainActivity.OWNER_MESSAGE);
+        this.number = receivedIntent.getExtras().getString(MainActivity.NUMBER_MESSAGE);
 
         //Get the main layout of this activity
         LinearLayout main_layout = (LinearLayout)findViewById(R.id.content_holder);
@@ -77,17 +74,15 @@ public class EditAccountActivity extends AppCompatActivity {
 
                 //First check if some information was actually updated
                 if (newOwner.equals(owner) && newNumber.equals(number)){
+                    //No actual updating was done, we can finish with a false value
                     finishWithResult(false);
                 }
                 else{
-                    //Get the resource arrays needed for validation
-                    String[] countries = getResources().getStringArray(R.array.countryCodes);
-                    int[] numberLengths = getResources().getIntArray(R.array.numberLengths);
 
                     boolean isValid = false;
                     try {
                         //Try to validate and save the new account.
-                        isValid = Utilities.isAccountValid(newOwner, newNumber, countries, numberLengths);
+                        isValid = Utilities.isAccountValid(newOwner, newNumber);
                     }
                     catch(Exception ex){
                         ex.printStackTrace();
@@ -120,7 +115,7 @@ public class EditAccountActivity extends AppCompatActivity {
 
         //Check if the account information was modified and add the new account information
         if (updated) {
-            data.putExtra("id", getIntent().getExtras().getInt("id")); //TODO: korvaa "id" jollain vakiolla
+            data.putExtra(MainActivity.ROW_INDEX, getIntent().getExtras().getInt(MainActivity.ROW_INDEX)); //TODO: korvaa "id" jollain vakiolla
             data.putExtra(MainActivity.OWNER_MESSAGE, newOwner);
             data.putExtra(MainActivity.NUMBER_MESSAGE, newNumber);
         }

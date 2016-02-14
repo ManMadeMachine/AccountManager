@@ -39,7 +39,7 @@ public class AddAccountActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //Get the main layoyt of this activity
+        //Get the main layout of this activity
         LinearLayout main_layout = (LinearLayout)findViewById(R.id.content_holder);
 
         //Get the layout inflater service
@@ -60,24 +60,21 @@ public class AddAccountActivity extends AppCompatActivity {
                 newOwner = ((EditText)findViewById(R.id.owner)).getText().toString();
                 newNumber = ((EditText)findViewById(R.id.number)).getText().toString();
 
-                //Get the resource arrays needed for validation
-                String[] countries = getResources().getStringArray(R.array.countryCodes);
-                int[] numberLengths = getResources().getIntArray(R.array.numberLengths);
-
                 boolean isValid = false;
+
                 try {
-                    //Try to validate and save the new account.
-                    isValid = Utilities.isAccountValid(newOwner, newNumber, countries, numberLengths);
+                    //Try to validate the new account.
+                    isValid = Utilities.isAccountValid(newOwner, newNumber);
                 }
                 catch(Exception ex){
                     ex.printStackTrace();
                 }
 
+                //If the account was valid, it can be saved to a file. Otherwise an error toast is shown.
                 if (isValid){
-                    saveAccount();
-
                     //Save the new account into the accounts file. If the saving is
                     //successful, we can close this activity and return to the main activity
+                    saveAccount();
                     finishWithResult(true);
                 }
                 else{
@@ -109,7 +106,7 @@ public class AddAccountActivity extends AppCompatActivity {
         FileOutputStream output = null;
 
         try{
-            output = openFileOutput("accounts.txt", MODE_APPEND);
+            output = openFileOutput(MainActivity.ACCOUNTS_FILENAME, MODE_APPEND);
 
             //append
             output.write(newAccount.toCSVString().getBytes());
@@ -123,7 +120,6 @@ public class AddAccountActivity extends AppCompatActivity {
             fileNotFoundEx.printStackTrace();
         }
         catch(IOException ex){
-            Log.i(TAG, "Error while saving new account!");
             ex.printStackTrace();
         }
 
@@ -131,7 +127,9 @@ public class AddAccountActivity extends AppCompatActivity {
     }
 
     /**
-     * Method for finishing this activity with a result. The result
+     * Method for creating a result and finishing with it.
+     *
+     * @param created boolean value, was the account created or not
      */
     private void finishWithResult(boolean created){
         Intent data = new Intent();
